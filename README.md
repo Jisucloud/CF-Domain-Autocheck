@@ -63,7 +63,7 @@
     | TOKEN             | 默认是domain                                                                   |  ✅️   | 登录密码，最好自定义，不填则默认是domain |
     | TG_TOKEN          | telegram找[@BotFather](https://t.me/BotFather)获取                             |  ❌️   | 可在界面后端配置                         |
     | TG_ID             | telegram找[@userinfobot](https://t.me/userinfobot)获取，或者群机器人也行       |  ❌️   | 可在界面后端配置                         |
-    | DD_TOKEN          | 钉钉机器人获取                             |  ❌️   | 可在界面后端配置                         |
+    | DD_TOKEN          | 钉钉群机器人获取                             |  ❌️   | 可在界面后端配置                         |
     | DD_SECRET         | 钉钉群机器人获取       |  ❌️   | 可在界面后端配置                         |
     | SITE_NAME         | 默认为域名到期监控                                                             |  ❌️   | 不填，默认就是域名到期监控               |
     | LOGO_URL          | https://123abc.com/logo.svg                                                    |  ❌️   | 网站logo，有需要可自行设置               |
