@@ -24,6 +24,10 @@ const DEFAULT_TOKEN = ''; // 默认密码，留空则使用'domain'，外置变�
 const DEFAULT_TG_TOKEN = ''; // Telegram机器人Token，外置变量为TG_TOKEN
 const DEFAULT_TG_ID = '';    // Telegram聊天ID，外置变量为TG_ID
 
+// DingTalk通知配置
+const DEFAULT_DD_TOKEN = ''; // 钉钉机器人Token，外置变量为DD_TOKEN
+const DEFAULT_DD_SECRET = ''; // 钉钉机器人Secret，外置变量为DD_SECRET
+
 // 网站标题配置
 const DEFAULT_SITE_NAME = ''; // 默认网站标题，外置变量为SITE_NAME
 
@@ -2097,30 +2101,73 @@ const getHTMLContent = (title) => `
                 </div>
                 <div class="modal-body">
                     <form id="settingsForm">
-                        <h6 class="mb-3" style="display: flex; align-items: center; gap: 5px;"><i class="iconfont icon-telegram" style="color: white;"></i> Telegram通知设置</h6>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="telegramEnabled">
-                            <label class="form-check-label" for="telegramEnabled">启用Telegram通知</label>
+                        <!-- 选项卡导航 -->
+                        <ul class="nav nav-tabs mb-3" id="notificationTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="telegram-tab" data-bs-toggle="tab" data-bs-target="#telegram-content" type="button" role="tab" aria-controls="telegram-content" aria-selected="true">
+                                    <i class="iconfont icon-telegram"></i> Telegram
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="dingtalk-tab" data-bs-toggle="tab" data-bs-target="#dingtalk-content" type="button" role="tab" aria-controls="dingtalk-content" aria-selected="false">
+                                    <i class="iconfont icon-dingding"></i> 钉钉
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="mb-3">
+                            <label for="notifyDays" class="form-label"><i class="iconfont icon-lingdang"></i> 提前通知天数</label>
+                            <input type="number" class="form-control" id="notifyDays" min="1" max="90" value="30">
+                            <div class="form-text">域名到期前多少天开始发送通知（所有通知渠道共用）</div>
                         </div>
-                        <div id="telegramSettings" style="display: none;">
-                            <div class="mb-3">
-                                <label for="telegramToken" class="form-label"><i class="iconfont icon-key"></i> 机器人Token</label>
-                                <input type="text" class="form-control" id="telegramToken" placeholder="如已在环境变量中配置则可留空">
-                                <div class="form-text">在Telegram中找到@BotFather创建机器人并获取Token</div>
+
+                        <div class="tab-content" id="notificationTabContent">
+                            <!-- Telegram 设置 -->
+                            <div class="tab-pane fade show active" id="telegram-content" role="tabpanel" aria-labelledby="telegram-tab">
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="telegramEnabled">
+                                    <label class="form-check-label" for="telegramEnabled">启用Telegram通知</label>
+                                </div>
+                                <div id="telegramSettings" style="display: none;">
+                                    <div class="mb-3">
+                                        <label for="telegramToken" class="form-label"><i class="iconfont icon-key"></i> 机器人Token</label>
+                                        <input type="text" class="form-control" id="telegramToken" placeholder="如已在环境变量中配置则可留空">
+                                        <div class="form-text">在Telegram中找到@BotFather创建机器人并获取Token</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="telegramChatId" class="form-label"><i class="iconfont icon-robot-2-fill"></i> 聊天ID</label>
+                                        <input type="text" class="form-control" id="telegramChatId" placeholder="如已在环境变量中配置则可留空">
+                                        <div class="form-text">可以使用@userinfobot获取个人ID，或将机器人添加到群组后获取群组ID</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-info" id="testTelegramBtn"><i class="iconfont icon-paper-plane" style="color: white;"></i> <span style="color: white;">测试Telegram通知</span></button>
+                                        <span id="testResult" class="ms-2"></span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="telegramChatId" class="form-label"><i class="iconfont icon-robot-2-fill"></i> 聊天ID</label>
-                                <input type="text" class="form-control" id="telegramChatId" placeholder="如已在环境变量中配置则可留空">
-                                <div class="form-text">可以使用@userinfobot获取个人ID，或将机器人添加到群组后获取群组ID</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="notifyDays" class="form-label"><i class="iconfont icon-lingdang"></i> 提前通知天数</label>
-                                <input type="number" class="form-control" id="notifyDays" min="1" max="90" value="30">
-                                <div class="form-text">域名到期前多少天开始发送通知</div>
-                            </div>
-                            <div class="mb-3">
-                                <button type="button" class="btn btn-info" id="testTelegramBtn"><i class="iconfont icon-paper-plane" style="color: white;"></i> <span style="color: white;">测试Telegram通知</span></button>
-                                <span id="testResult" class="ms-2"></span>
+                            
+                            <!-- 钉钉 设置 -->
+                            <div class="tab-pane fade" id="dingtalk-content" role="tabpanel" aria-labelledby="dingtalk-tab">
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="dingTalkEnabled">
+                                    <label class="form-check-label" for="dingTalkEnabled">启用钉钉通知</label>
+                                </div>
+                                <div id="dingTalkSettings" style="display: none;">
+                                    <div class="mb-3">
+                                        <label for="dingTalkToken" class="form-label"><i class="iconfont icon-key"></i> Access Token</label>
+                                        <input type="text" class="form-control" id="dingTalkToken" placeholder="如已在环境变量中配置则可留空">
+                                        <div class="form-text">钉钉机器人Webhook地址中的access_token参数值</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="dingTalkSecret" class="form-label"><i class="iconfont icon-lock"></i> 加签密钥 (Secret)</label>
+                                        <input type="text" class="form-control" id="dingTalkSecret" placeholder="如已在环境变量中配置则可留空">
+                                        <div class="form-text">钉钉机器人安全设置中勾选"加签"后生成的密钥</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-info" id="testDingTalkBtn"><i class="iconfont icon-paper-plane" style="color: white;"></i> <span style="color: white;">测试钉钉通知</span></button>
+                                        <span id="dingTalkTestResult" class="ms-2"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -2221,6 +2268,7 @@ const getHTMLContent = (title) => `
         let currentDomainId = null;
         let currentCategoryId = null;
         let telegramConfig = {};
+        let dingTalkConfig = {};
         let currentSortField = 'suffix'; // 默认排序字段改为域名后缀
         let currentSortOrder = 'asc'; // 默认排序顺序
         let viewMode = 'auto-collapse'; // 默认查看模式：auto-collapse (自动折叠), expand-all (全部展开), collapse-all (全部折叠)
@@ -2268,7 +2316,7 @@ const getHTMLContent = (title) => `
             // 确保DOM元素已完全加载
             setTimeout(() => {
                 // 使用Promise.all并行加载数据
-                Promise.all([loadDomains(), loadCategories(), loadTelegramConfig()])
+                Promise.all([loadDomains(), loadCategories(), loadTelegramConfig(), loadDingTalkConfig()])
                     .catch(error => showAlert('danger', '数据加载失败: ' + error.message));
             }, 300);
             
@@ -2470,11 +2518,19 @@ const getHTMLContent = (title) => `
                 document.getElementById('telegramSettings').style.display = this.checked ? 'block' : 'none';
             });
             
+            // 钉钉启用状态变化
+            document.getElementById('dingTalkEnabled').addEventListener('change', function() {
+                document.getElementById('dingTalkSettings').style.display = this.checked ? 'block' : 'none';
+            });
+            
             // 保存设置按钮
             document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
             
             // 测试Telegram按钮
             document.getElementById('testTelegramBtn').addEventListener('click', testTelegram);
+            
+            // 测试钉钉按钮
+            document.getElementById('testDingTalkBtn').addEventListener('click', testDingTalk);
             
             // 域名通知设置 - 全局/自定义切换
             document.getElementById('useGlobalSettings').addEventListener('change', function() {
@@ -2844,7 +2900,11 @@ const getHTMLContent = (title) => `
                 // 更新表单
                 document.getElementById('telegramEnabled').checked = telegramConfig.enabled;
                 document.getElementById('telegramSettings').style.display = telegramConfig.enabled ? 'block' : 'none';
-                document.getElementById('notifyDays').value = telegramConfig.notifyDays || 30;
+                // 统一使用notifyDays，如果telegramConfig中有值则使用，否则默认为30
+                // 注意：这里可能会被loadDingTalkConfig覆盖，但保存时会统一保存
+                if (telegramConfig.notifyDays) {
+                    document.getElementById('notifyDays').value = telegramConfig.notifyDays;
+                }
                 
                 // 处理聊天ID的显示
                 if (telegramConfig.chatIdFromEnv) {
@@ -2876,38 +2936,102 @@ const getHTMLContent = (title) => `
             }
         }
         
-        // 保存设置
-        async function saveSettings() {
-            const enabled = document.getElementById('telegramEnabled').checked;
-            // 获取表单值，即使是空字符串也保留
-            const botToken = document.getElementById('telegramToken').value;
-            const chatId = document.getElementById('telegramChatId').value;
-            const notifyDays = parseInt(document.getElementById('notifyDays').value) || 30;
-            
+        // 加载钉钉配置
+        async function loadDingTalkConfig() {
             try {
-                const response = await fetch('/api/telegram/config', {
-                    headers: { 'Content-Type': 'application/json' },
-                    method: 'POST',
-                    body: JSON.stringify({
-                        enabled,
-                        botToken,
-                        chatId,
-                        notifyDays
-                    })
-                });
+                const response = await fetch('/api/dingtalk/config');
+                if (!response.ok) throw new Error('获取钉钉配置失败');
                 
-                if (!response.ok) {
-                    try {
-                        const error = await response.json();
-                        throw new Error(error.error || '保存设置失败');
-                    } catch (jsonError) {
-                        // 如果响应不是JSON格式，直接使用状态文本
-                        throw new Error('保存设置失败: ' + response.statusText);
-                    }
+                dingTalkConfig = await response.json();
+                
+                // 更新表单
+                document.getElementById('dingTalkEnabled').checked = dingTalkConfig.enabled;
+                document.getElementById('dingTalkSettings').style.display = dingTalkConfig.enabled ? 'block' : 'none';
+                // 如果dingTalkConfig中有notifyDays且比当前值更新（或者当前是默认值），则更新
+                // 实际上由于是并行加载，这里简单处理为：如果有值就更新
+                if (dingTalkConfig.notifyDays) {
+                    document.getElementById('notifyDays').value = dingTalkConfig.notifyDays;
                 }
                 
-                telegramConfig = await response.json();
-                showAlert('success', '设置保存成功');
+                // 处理Token的显示
+                if (dingTalkConfig.tokenFromEnv) {
+                    document.getElementById('dingTalkToken').value = '';
+                    document.getElementById('dingTalkToken').placeholder = '已通过环境变量配置';
+                    document.getElementById('dingTalkToken').disabled = false;
+                } else {
+                    document.getElementById('dingTalkToken').value = dingTalkConfig.token || '';
+                    document.getElementById('dingTalkToken').placeholder = '如已在环境变量中配置则可留空';
+                    document.getElementById('dingTalkToken').disabled = false;
+                }
+                
+                // 处理Secret的显示
+                if (dingTalkConfig.secretFromEnv) {
+                    document.getElementById('dingTalkSecret').value = '';
+                    document.getElementById('dingTalkSecret').placeholder = '已通过环境变量配置';
+                    document.getElementById('dingTalkSecret').disabled = false;
+                } else {
+                    document.getElementById('dingTalkSecret').value = dingTalkConfig.secret || '';
+                    document.getElementById('dingTalkSecret').placeholder = '如已在环境变量中配置则可留空';
+                    document.getElementById('dingTalkSecret').disabled = false;
+                }
+            } catch (error) {
+                // 忽略钉钉配置加载失败
+            }
+        }
+        
+        // 保存设置
+        async function saveSettings() {
+            // 保存Telegram设置
+            const tgEnabled = document.getElementById('telegramEnabled').checked;
+            const tgBotToken = document.getElementById('telegramToken').value;
+            const tgChatId = document.getElementById('telegramChatId').value;
+            // 统一使用一个通知天数设置
+            const notifyDays = parseInt(document.getElementById('notifyDays').value) || 30;
+            
+            // 保存钉钉设置
+            const ddEnabled = document.getElementById('dingTalkEnabled').checked;
+            const ddToken = document.getElementById('dingTalkToken').value;
+            const ddSecret = document.getElementById('dingTalkSecret').value;
+            
+            try {
+                // 并行保存两个配置，都使用同一个notifyDays
+                const [tgResponse, ddResponse] = await Promise.all([
+                    fetch('/api/telegram/config', {
+                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST',
+                        body: JSON.stringify({
+                            enabled: tgEnabled,
+                            botToken: tgBotToken,
+                            chatId: tgChatId,
+                            notifyDays: notifyDays
+                        })
+                    }),
+                    fetch('/api/dingtalk/config', {
+                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST',
+                        body: JSON.stringify({
+                            enabled: ddEnabled,
+                            token: ddToken,
+                            secret: ddSecret,
+                            notifyDays: notifyDays
+                        })
+                    })
+                ]);
+                
+                if (!tgResponse.ok) {
+                    const error = await tgResponse.json();
+                    throw new Error('Telegram设置保存失败: ' + (error.error || tgResponse.statusText));
+                }
+                
+                if (!ddResponse.ok) {
+                    const error = await ddResponse.json();
+                    throw new Error('钉钉设置保存失败: ' + (error.error || ddResponse.statusText));
+                }
+                
+                telegramConfig = await tgResponse.json();
+                dingTalkConfig = await ddResponse.json();
+                
+                showAlert('success', '所有设置保存成功');
                 
                 // 关闭模态框
                 bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
@@ -2935,6 +3059,31 @@ const getHTMLContent = (title) => `
                 const result = await response.json();
                 testResult.textContent = '测试成功！请检查Telegram是否收到消息';
                 testResult.className = 'ms-2 telegram-test-success';
+            } catch (error) {
+                testResult.textContent = '测试失败: ' + error.message;
+                testResult.className = 'ms-2 text-danger';
+            }
+        }
+        
+        // 测试钉钉通知
+        async function testDingTalk() {
+            const testResult = document.getElementById('dingTalkTestResult');
+            testResult.textContent = '发送中...';
+            testResult.className = 'ms-2 text-info';
+            
+            try {
+                const response = await fetch('/api/dingtalk/test', {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '测试失败');
+                }
+                
+                const result = await response.json();
+                testResult.textContent = '测试成功！请检查钉钉群是否收到消息';
+                testResult.className = 'ms-2 text-success';
             } catch (error) {
                 testResult.textContent = '测试失败: ' + error.message;
                 testResult.className = 'ms-2 text-danger';
@@ -4470,7 +4619,7 @@ const getHTMLContent = (title) => `
                         }
                         
                         const result = await response.json();
-                        showAlert('success', '通知测试成功！请检查Telegram是否收到消息');
+                        showAlert('success', result.message || '通知测试成功！');
                     } catch (error) {
                         showAlert('danger', '测试通知失败: ' + error.message);
                     }
@@ -4772,6 +4921,37 @@ async function handleApiRequest(request) {
       return jsonResponse(result);
     } catch (error) {
       return jsonResponse({ error: '测试Telegram通知失败: ' + error.message }, 400);
+    }
+  }
+
+  // 获取DingTalk配置
+  if (path === '/api/dingtalk/config' && request.method === 'GET') {
+    try {
+      const config = await getDingTalkConfig();
+      return jsonResponse(config);
+    } catch (error) {
+      return jsonResponse({ error: '获取钉钉配置失败' }, 500);
+    }
+  }
+  
+  // 保存DingTalk配置
+  if (path === '/api/dingtalk/config' && request.method === 'POST') {
+    try {
+      const configData = await request.json();
+      const config = await saveDingTalkConfig(configData);
+      return jsonResponse(config);
+    } catch (error) {
+      return jsonResponse({ error: '保存钉钉配置失败: ' + error.message }, 400);
+    }
+  }
+  
+  // 测试DingTalk通知
+  if (path === '/api/dingtalk/test' && request.method === 'POST') {
+    try {
+      const result = await testDingTalkNotification();
+      return jsonResponse(result);
+    } catch (error) {
+      return jsonResponse({ error: '测试钉钉通知失败: ' + error.message }, 400);
     }
   }
 
@@ -5333,6 +5513,197 @@ async function getTelegramConfigWithToken() {
   };
 }
 
+// 获取DingTalk配置
+async function getDingTalkConfig() {
+  const configStr = await DOMAIN_MONITOR.get('dingtalk_config') || '{}';
+  const config = JSON.parse(configStr);
+  
+  // 检查是否使用环境变量
+  const tokenFromEnv = (typeof DD_TOKEN !== 'undefined' || typeof DD_BOT_TOKEN !== 'undefined') && (
+    config.token === undefined ||
+    config.token === null ||
+    config.token === ''
+  );
+  
+  const secretFromEnv = (typeof DD_SECRET !== 'undefined' || typeof DD_BOT_SECRET !== 'undefined') && (
+    config.secret === undefined ||
+    config.secret === null ||
+    config.secret === ''
+  );
+  
+  // 检查是否使用代码中定义的变量
+  const tokenFromCode = !tokenFromEnv && DEFAULT_DD_TOKEN !== '' && (
+    config.token === undefined ||
+    config.token === null ||
+    config.token === ''
+  );
+  
+  const secretFromCode = !secretFromEnv && DEFAULT_DD_SECRET !== '' && (
+    config.secret === undefined ||
+    config.secret === null ||
+    config.secret === ''
+  );
+  
+  return {
+    enabled: !!config.enabled,
+    token: tokenFromEnv || tokenFromCode ? '' : (config.token || ''),
+    secret: secretFromEnv || secretFromCode ? '' : (config.secret || ''),
+    tokenFromEnv: tokenFromEnv || tokenFromCode,
+    secretFromEnv: secretFromEnv || secretFromCode,
+    hasToken: tokenFromEnv || tokenFromCode || (config.token !== undefined && config.token !== null && config.token !== ''),
+    notifyDays: config.notifyDays || 30,
+  };
+}
+
+// 保存DingTalk配置
+async function saveDingTalkConfig(configData) {
+  if (configData.enabled) {
+    const hasTokenSource = (configData.token !== undefined && configData.token !== null) ||
+                          typeof DD_TOKEN !== 'undefined' || typeof DD_BOT_TOKEN !== 'undefined' ||
+                          DEFAULT_DD_TOKEN !== '';
+    const hasSecretSource = (configData.secret !== undefined && configData.secret !== null) ||
+                           typeof DD_SECRET !== 'undefined' || typeof DD_BOT_SECRET !== 'undefined' ||
+                           DEFAULT_DD_SECRET !== '';
+    
+    if (!hasTokenSource) {
+      throw new Error('启用钉钉通知需要提供机器人Token或在环境变量中配置');
+    }
+    if (!hasSecretSource) {
+      throw new Error('启用钉钉通知需要提供机器人Secret或在环境变量中配置');
+    }
+  }
+  
+  const config = {
+    enabled: !!configData.enabled,
+    token: configData.token,
+    secret: configData.secret,
+    notifyDays: configData.notifyDays || 30,
+  };
+  
+  await DOMAIN_MONITOR.put('dingtalk_config', JSON.stringify(config));
+  
+  // 重新获取配置以返回完整状态
+  return await getDingTalkConfig();
+}
+
+// 获取完整的DingTalk配置（包括token和secret）
+async function getDingTalkConfigWithSecret() {
+  const configStr = await DOMAIN_MONITOR.get('dingtalk_config') || '{}';
+  const config = JSON.parse(configStr);
+  
+  if ((typeof DD_TOKEN !== 'undefined' || typeof DD_BOT_TOKEN !== 'undefined') && (
+      config.token === undefined ||
+      config.token === null ||
+      config.token === ''
+  )) {
+    config.token = typeof DD_TOKEN !== 'undefined' ? DD_TOKEN : DD_BOT_TOKEN;
+  }
+  
+  if ((typeof DD_SECRET !== 'undefined' || typeof DD_BOT_SECRET !== 'undefined') && (
+      config.secret === undefined ||
+      config.secret === null ||
+      config.secret === ''
+  )) {
+    config.secret = typeof DD_SECRET !== 'undefined' ? DD_SECRET : DD_BOT_SECRET;
+  }
+  
+  if (DEFAULT_DD_TOKEN !== '' && (
+      config.token === undefined ||
+      config.token === null ||
+      config.token === ''
+  )) {
+    config.token = DEFAULT_DD_TOKEN;
+  }
+  
+  if (DEFAULT_DD_SECRET !== '' && (
+      config.secret === undefined ||
+      config.secret === null ||
+      config.secret === ''
+  )) {
+    config.secret = DEFAULT_DD_SECRET;
+  }
+  
+  return {
+    enabled: !!config.enabled,
+    token: config.token || '',
+    secret: config.secret || '',
+    notifyDays: config.notifyDays || 30,
+  };
+}
+
+// 发送DingTalk消息
+async function sendDingTalkMessage(config, title, content) {
+  let token = config.token;
+  let secret = config.secret;
+  
+  if (!token) {
+    if (typeof DD_TOKEN !== 'undefined') token = DD_TOKEN;
+    else if (typeof DD_BOT_TOKEN !== 'undefined') token = DD_BOT_TOKEN;
+    else if (DEFAULT_DD_TOKEN !== '') token = DEFAULT_DD_TOKEN;
+  }
+  
+  if (!secret) {
+    if (typeof DD_SECRET !== 'undefined') secret = DD_SECRET;
+    else if (typeof DD_BOT_SECRET !== 'undefined') secret = DD_BOT_SECRET;
+    else if (DEFAULT_DD_SECRET !== '') secret = DEFAULT_DD_SECRET;
+  }
+  
+  if (!token) throw new Error('未配置钉钉机器人Token');
+  if (!secret) throw new Error('未配置钉钉机器人Secret');
+  
+  const timestamp = Date.now();
+  const stringToSign = `${timestamp}\n${secret}`;
+  
+  // HMAC-SHA256签名
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const msgData = encoder.encode(stringToSign);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
+  
+  // Base64编码
+  const signBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  const sign = encodeURIComponent(signBase64);
+  
+  const url = `https://oapi.dingtalk.com/robot/send?access_token=${token}&timestamp=${timestamp}&sign=${sign}`;
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      msgtype: 'markdown',
+      markdown: {
+        title: title,
+        text: `### ${title}\n\n${content}`
+      }
+    })
+  });
+  
+  const result = await response.json();
+  if (result.errcode !== 0) {
+    throw new Error(`发送钉钉消息失败: ${result.errmsg}`);
+  }
+  
+  return result;
+}
+
+// 测试DingTalk通知
+async function testDingTalkNotification() {
+  const config = await getDingTalkConfigWithSecret();
+  
+  if (!config.enabled) {
+    throw new Error('钉钉通知未启用');
+  }
+  
+  const message = '这是一条来自域名监控系统的测试通知，如果您收到此消息，表示钉钉通知配置成功！';
+  await sendDingTalkMessage(config, '域名监控测试', message);
+  
+  return { success: true, message: '测试通知已发送' };
+}
+
 // ================================
 // 通知功能区域
 // ================================
@@ -5569,9 +5940,17 @@ async function checkExpiringDomains() {
   const domains = await getDomains();
   const today = new Date();
   
-  // 获取Telegram配置
+  // 获取通知配置
   const telegramConfig = await getTelegramConfigWithToken();
-  const globalNotifyDays = telegramConfig.enabled ? telegramConfig.notifyDays : 30;
+  const dingTalkConfig = await getDingTalkConfigWithSecret();
+  
+  // 确定全局通知天数（优先使用Telegram配置，如果未启用则尝试使用钉钉配置）
+  let globalNotifyDays = 30;
+  if (telegramConfig.enabled) {
+    globalNotifyDays = telegramConfig.notifyDays;
+  } else if (dingTalkConfig.enabled) {
+    globalNotifyDays = dingTalkConfig.notifyDays;
+  }
   
   // 筛选出即将到期和已过期的域名
   const domainsToNotify = domains.filter(domain => {
@@ -5608,14 +5987,24 @@ async function checkExpiringDomains() {
   if (expiringDomains.length > 0 || expiredDomains.length > 0) {
     
     // 如果启用了Telegram通知，则发送通知
-    if (telegramConfig.enabled && 
-        ((telegramConfig.botToken || typeof TG_TOKEN !== 'undefined') && 
+    if (telegramConfig.enabled &&
+        ((telegramConfig.botToken || typeof TG_TOKEN !== 'undefined') &&
          (telegramConfig.chatId || typeof TG_ID !== 'undefined'))) {
       try {
         // 发送合并的域名通知
         await sendCombinedDomainsNotification(telegramConfig, expiringDomains, expiredDomains);
       } catch (error) {
-        // 静默处理Telegram通知发送失败
+        console.error('Telegram通知发送失败:', error);
+      }
+    }
+
+    // 如果启用了钉钉通知，则发送通知
+    if (dingTalkConfig.enabled && dingTalkConfig.token && dingTalkConfig.secret) {
+      try {
+        // 发送合并的域名通知（钉钉版）
+        await sendCombinedDomainsNotificationDingTalk(dingTalkConfig, expiringDomains, expiredDomains);
+      } catch (error) {
+        console.error('钉钉通知发送失败:', error);
       }
     }
   }
@@ -5744,6 +6133,83 @@ async function sendCombinedDomainsNotification(config, expiringDomains, expiredD
   return await sendTelegramMessage(config, message);
 }
 
+// 发送合并的域名通知（钉钉版）
+async function sendCombinedDomainsNotificationDingTalk(config, expiringDomains, expiredDomains) {
+  if (expiringDomains.length === 0 && expiredDomains.length === 0) return;
+  
+  let message = '';
+  
+  // 处理即将到期的域名
+  if (expiringDomains.length > 0) {
+    const title = '🚨 **域名到期提醒** 🚨';
+    const separator = '-------------------';
+    
+    message += title + '\n' + separator + '\n\n';
+    
+    expiringDomains.forEach((domain, index) => {
+      const expiryDate = new Date(domain.expiryDate);
+      const today = new Date();
+      const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+      
+      if (index > 0) {
+        message += '\n';
+      }
+      
+      message += '- 🌍 **域名:** ' + domain.name + '\n';
+      if (domain.registrar) {
+        message += '- 🏬 **注册厂商:** ' + domain.registrar + '\n';
+      }
+      message += '- ⏳ **剩余时间:** ' + daysLeft + ' 天\n';
+      message += '- 📅 **到期日期:** ' + formatDate(domain.expiryDate) + '\n';
+      
+      if (domain.renewLink) {
+        message += '- ⚠️ **点击续期:** [链接](' + domain.renewLink + ')\n';
+      } else {
+        message += '- ⚠️ **点击续期:** 未设置续期链接\n';
+      }
+    });
+  }
+  
+  // 如果两种类型的域名都存在，添加分隔线
+  if (expiringDomains.length > 0 && expiredDomains.length > 0) {
+    message += '\n━━━━━━━━━━━━━━━━\n\n';
+  }
+  
+  // 处理已过期的域名
+  if (expiredDomains.length > 0) {
+    const title = '🚫 **域名已过期提醒** 🚫';
+    const separator = '---------------------';
+    
+    message += title + '\n' + separator + '\n\n';
+    
+    expiredDomains.forEach((domain, index) => {
+      const expiryDate = new Date(domain.expiryDate);
+      const today = new Date();
+      const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+      
+      if (index > 0) {
+        message += '\n';
+      }
+      
+      message += '- 🌍 **域名:** ' + domain.name + '\n';
+      if (domain.registrar) {
+        message += '- 🏬 **注册厂商:** ' + domain.registrar + '\n';
+      }
+      message += '- ⏳ **剩余时间:** ' + daysLeft + ' 天\n';
+      message += '- 📅 **到期日期:** ' + formatDate(domain.expiryDate) + '\n';
+      
+      if (domain.renewLink) {
+        message += '- ⚠️ **点击续期:** [链接](' + domain.renewLink + ')\n';
+      } else {
+        message += '- ⚠️ **点击续期:** 未设置续期链接\n';
+      }
+    });
+  }
+  
+  // 发送消息
+  return await sendDingTalkMessage(config, '域名监控通知', message);
+}
+
 // 添加测试单个域名通知的后端函数
 async function testSingleDomainNotification(id) {
   // 获取域名信息
@@ -5754,56 +6220,103 @@ async function testSingleDomainNotification(id) {
     throw new Error('域名不存在');
   }
   
-  // 获取Telegram配置
+  // 获取通知配置
   const telegramConfig = await getTelegramConfigWithToken();
+  const dingTalkConfig = await getDingTalkConfigWithSecret();
   
-  if (!telegramConfig.enabled) {
-    throw new Error('Telegram通知未启用');
+  if (!telegramConfig.enabled && !dingTalkConfig.enabled) {
+    throw new Error('未启用任何通知渠道');
   }
   
-  if (!telegramConfig.botToken && typeof TG_TOKEN === 'undefined') {
-    throw new Error('未配置Telegram机器人Token');
-  }
+  const results = [];
+  const errors = [];
   
-  if (!telegramConfig.chatId && typeof TG_ID === 'undefined') {
-    throw new Error('未配置Telegram聊天ID');
-  }
-  
-  // 构建测试消息
+  // 构建测试消息数据
   const expiryDate = new Date(domain.expiryDate);
   const today = new Date();
   const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
   const isExpired = daysLeft <= 0;
   
-  let title = isExpired ? 
-    '🚫 <b>域名已过期测试通知</b> 🚫' : 
-    '🚨 <b>域名到期测试通知</b> 🚨';
-  
-  // 根据不同通知类型使用不同长度的分隔线
-  // 域名到期测试通知使用23个字符，域名已过期测试通知使用25个字符
-  const separator = isExpired ? 
-    '=========================' : 
-        '=======================';
-  
-  let message = title + '\n' + separator + '\n\n';
-  message += '这是一条测试通知，用于预览域名' + (isExpired ? '已过期' : '到期') + '提醒的格式：\n\n';
+  // 1. 发送Telegram通知
+  if (telegramConfig.enabled) {
+    if ((telegramConfig.botToken || typeof TG_TOKEN !== 'undefined') &&
+        (telegramConfig.chatId || typeof TG_ID !== 'undefined')) {
+      try {
+        let title = isExpired ?
+          '🚫 <b>域名已过期测试通知</b> 🚫' :
+          '🚨 <b>域名到期测试通知</b> 🚨';
+        
+        const separator = isExpired ?
+          '=========================' :
+          '=======================';
+        
+        let message = title + '\n' + separator + '\n\n';
+        message += '这是一条测试通知，用于预览域名' + (isExpired ? '已过期' : '到期') + '提醒的格式：\n\n';
 
-  message += '🌍 <b>域名:</b> ' + domain.name + '\n';
-  if (domain.registrar) {
-    message += '🏬 <b>注册厂商:</b> ' + domain.registrar + '\n';
+        message += '🌍 <b>域名:</b> ' + domain.name + '\n';
+        if (domain.registrar) {
+          message += '🏬 <b>注册厂商:</b> ' + domain.registrar + '\n';
+        }
+        message += '⏳ <b>剩余时间:</b> ' + daysLeft + ' 天\n';
+        message += '📅 <b>到期日期:</b> ' + formatDate(domain.expiryDate) + '\n';
+        
+        if (domain.renewLink) {
+          message += '⚠️ <b>点击续期:</b> ' + domain.renewLink + '\n';
+        } else {
+          message += '⚠️ <b>点击续期:</b> 未设置续期链接\n';
+        }
+        
+        await sendTelegramMessage(telegramConfig, message);
+        results.push('Telegram');
+      } catch (error) {
+        errors.push(`Telegram: ${error.message}`);
+      }
+    } else {
+      errors.push('Telegram: 未配置Token或ChatID');
+    }
   }
-  message += '⏳ <b>剩余时间:</b> ' + daysLeft + ' 天\n';
-  message += '📅 <b>到期日期:</b> ' + formatDate(domain.expiryDate) + '\n';
   
-  if (domain.renewLink) {
-    message += '⚠️ <b>点击续期:</b> ' + domain.renewLink + '\n';
+  // 2. 发送钉钉通知
+  if (dingTalkConfig.enabled) {
+    if (dingTalkConfig.token && dingTalkConfig.secret) {
+      try {
+        let title = isExpired ?
+          '🚫 **域名已过期测试通知** 🚫' :
+          '🚨 **域名到期测试通知** 🚨';
+        
+        const separator = '-------------------------';
+        
+        let message = title + '\n' + separator + '\n\n';
+        message += '这是一条测试通知，用于预览域名' + (isExpired ? '已过期' : '到期') + '提醒的格式：\n\n';
+
+        message += '- 🌍 **域名:** ' + domain.name + '\n';
+        if (domain.registrar) {
+          message += '- 🏬 **注册厂商:** ' + domain.registrar + '\n';
+        }
+        message += '- ⏳ **剩余时间:** ' + daysLeft + ' 天\n';
+        message += '- 📅 **到期日期:** ' + formatDate(domain.expiryDate) + '\n';
+        
+        if (domain.renewLink) {
+          message += '- ⚠️ **点击续期:** [链接](' + domain.renewLink + ')\n';
+        } else {
+          message += '- ⚠️ **点击续期:** 未设置续期链接\n';
+        }
+        
+        await sendDingTalkMessage(dingTalkConfig, '域名监控测试', message);
+        results.push('钉钉');
+      } catch (error) {
+        errors.push(`钉钉: ${error.message}`);
+      }
+    } else {
+      errors.push('钉钉: 未配置Token或Secret');
+    }
+  }
+  
+  if (results.length > 0) {
+    return { success: true, message: `测试通知已发送至: ${results.join(', ')}` + (errors.length > 0 ? ` (失败: ${errors.join(', ')})` : '') };
   } else {
-    message += '⚠️ <b>点击续期:</b> 未设置续期链接\n';
+    throw new Error(`发送失败: ${errors.join('; ')}`);
   }
-  
-  // 发送测试消息
-  const result = await sendTelegramMessage(telegramConfig, message);
-  return { success: true, message: '测试通知已发送' };
 }
 
 // ================================
